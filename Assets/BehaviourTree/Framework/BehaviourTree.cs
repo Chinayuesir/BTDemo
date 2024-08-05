@@ -13,6 +13,7 @@ namespace BTKit.Demo
 
         public override Status Process()
         {
+            if (Children.Count == 0) return Status.SUCCESS;
             return Children[mCurrentChild].Process();
         }
 
