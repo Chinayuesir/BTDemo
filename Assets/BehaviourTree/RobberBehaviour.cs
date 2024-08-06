@@ -8,7 +8,10 @@ namespace BTKit.Demo
         public GameObject FrontDoor;
         public GameObject BackDoor;
         public GameObject Diamond;
+        public GameObject Painting;
         public GameObject Van;
+
+        private GameObject mPickUpObject;
 
         [Range(0, 1000)] public int Money = 800;
 
@@ -16,11 +19,16 @@ namespace BTKit.Demo
         {
             base.Start();
             Sequence steal = new Sequence("Steal Something");
-            Selector openDoor = new Selector("Open Door");
             Leaf hasGotMoney = new Leaf("Has Got Money", HasMoney);
+            
+            Selector openDoor = new Selector("Open Door");
             Leaf goToFrontDoor = new Leaf("Go To Front Door", GoToFrontDoor);
             Leaf goToBackDoor = new Leaf("Go To Back Door", GoToBackDoor);
+
+            Selector selectObject = new Selector("Select Object to Steal");
             Leaf goToDiamond = new Leaf("Go To Diamond", GoToDiamond);
+            Leaf goToPainting = new Leaf("Go To Diamond", GoToPainting);
+            
             Leaf goToVan = new Leaf("Go To Van", GoToVan);
 
             Inverter inverterMoney = new Inverter("Inverter Money");
@@ -32,7 +40,9 @@ namespace BTKit.Demo
             steal.AddChild(inverterMoney);
 
             steal.AddChild(openDoor);
-            steal.AddChild(goToDiamond);
+            steal.AddChild(selectObject);
+            selectObject.AddChild(goToDiamond);
+            selectObject.AddChild(goToPainting);
             steal.AddChild(goToVan);
             mTree.AddChild(steal);
 
@@ -57,13 +67,27 @@ namespace BTKit.Demo
 
         private Node.Status GoToDiamond()
         {
+            if (!Diamond.activeSelf) return Node.Status.FAILURE;
             var status = GoToLocation(Diamond.transform.position);
             if (status == Node.Status.SUCCESS)
             {
                 Diamond.transform.position = transform.position + Vector3.up * 2;
                 Diamond.transform.SetParent(transform);
+                mPickUpObject = Diamond;
             }
-
+            return status;
+        }
+        
+        private Node.Status GoToPainting()
+        {
+            if (!Painting.activeSelf) return Node.Status.FAILURE;
+            var status = GoToLocation(Painting.transform.position);
+            if (status == Node.Status.SUCCESS)
+            {
+                Painting.transform.position = transform.position + Vector3.up * 2;
+                Painting.transform.SetParent(transform);
+                mPickUpObject = Painting;
+            }
             return status;
         }
 
@@ -73,9 +97,8 @@ namespace BTKit.Demo
             if (status == Node.Status.SUCCESS)
             {
                 Money += 300;
-                Diamond.SetActive(false);
+                mPickUpObject.SetActive(false);
             }
-
             return status;
         }
 
@@ -86,7 +109,7 @@ namespace BTKit.Demo
             {
                 if (!door.GetComponent<Lock>().IsLocked)
                 {
-                    door.SetActive(false);
+                    door.GetComponent<NavMeshObstacle>().enabled = false;
                     return Node.Status.SUCCESS;
                 }
 

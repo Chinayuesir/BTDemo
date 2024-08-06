@@ -45,7 +45,7 @@ namespace BTKit.Demo
                 mState = ActionState.IDLE;
                 return Node.Status.FAILURE;
             }
-            else if (distanceToTarget < 2)
+            else if (distanceToTarget <= 2)
             {
                 mState = ActionState.IDLE;
                 return Node.Status.SUCCESS;
