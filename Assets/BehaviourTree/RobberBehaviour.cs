@@ -10,24 +10,34 @@ namespace BTKit.Demo
         public GameObject Diamond;
         public GameObject Painting;
         public GameObject Van;
-
+        public GameObject[] Arts;
+        
         private GameObject mPickUpObject;
 
         [Range(0, 1000)] public int Money = 800;
 
+        private Leaf goToFrontDoor;
+        private Leaf goToBackDoor;
+        
         new void Start()
         {
             base.Start();
             Sequence steal = new Sequence("Steal Something");
             Leaf hasGotMoney = new Leaf("Has Got Money", HasMoney);
             
-            Selector openDoor = new Selector("Open Door");
-            Leaf goToFrontDoor = new Leaf("Go To Front Door", GoToFrontDoor);
-            Leaf goToBackDoor = new Leaf("Go To Back Door", GoToBackDoor);
+            PSelector openDoor = new PSelector("Open Door");
+            goToFrontDoor = new Leaf("Go To Front Door", GoToFrontDoor,1);
+            goToBackDoor = new Leaf("Go To Back Door", GoToBackDoor,2);
 
-            Selector selectObject = new Selector("Select Object to Steal");
-            Leaf goToDiamond = new Leaf("Go To Diamond", GoToDiamond);
-            Leaf goToPainting = new Leaf("Go To Diamond", GoToPainting);
+            RSelector selectObject = new RSelector("Select Object to Steal");
+            Leaf goToDiamond = new Leaf("Go To Diamond", GoToDiamond,2);
+            Leaf goToPainting = new Leaf("Go To Diamond", GoToPainting,1);
+
+            Leaf goToArt1 = new Leaf("Go To Art 1", GoToArt1);
+            Leaf goToArt2 = new Leaf("Go To Art 2", GoToArt2);
+            Leaf goToArt3 = new Leaf("Go To Art 3", GoToArt3);
+            // Leaf goToArt4 = new Leaf("Go To Art 4", GoToArt4);
+            // Leaf goToArt5 = new Leaf("Go To Art 5", GoToArt5);
             
             Leaf goToVan = new Leaf("Go To Van", GoToVan);
 
@@ -41,8 +51,9 @@ namespace BTKit.Demo
 
             steal.AddChild(openDoor);
             steal.AddChild(selectObject);
-            selectObject.AddChild(goToDiamond);
-            selectObject.AddChild(goToPainting);
+            selectObject.AddChild(goToArt1);
+            selectObject.AddChild(goToArt2);
+            selectObject.AddChild(goToArt3);
             steal.AddChild(goToVan);
             mTree.AddChild(steal);
 
@@ -57,12 +68,22 @@ namespace BTKit.Demo
 
         private Node.Status GoToFrontDoor()
         {
-            return GoToDoor(FrontDoor);
+            Node.Status s= GoToDoor(FrontDoor);
+            if (s == Node.Status.FAILURE)
+                goToFrontDoor.SortOrder = 10;
+            else
+                goToFrontDoor.SortOrder = 1;
+            return s;
         }
 
         private Node.Status GoToBackDoor()
         {
-            return GoToDoor(BackDoor);
+            Node.Status s= GoToDoor(BackDoor);
+            if (s == Node.Status.FAILURE)
+                goToBackDoor.SortOrder = 10;
+            else
+                goToBackDoor.SortOrder = 1;
+            return s;
         }
 
         private Node.Status GoToDiamond()
@@ -74,6 +95,45 @@ namespace BTKit.Demo
                 Diamond.transform.position = transform.position + Vector3.up * 2;
                 Diamond.transform.SetParent(transform);
                 mPickUpObject = Diamond;
+            }
+            return status;
+        }
+        
+        private Node.Status GoToArt1()
+        {
+            if (!Arts[0].activeSelf) return Node.Status.FAILURE;
+            var status = GoToLocation(Arts[0].transform.position);
+            if (status == Node.Status.SUCCESS)
+            {
+                Arts[0].transform.position = transform.position + Vector3.up * 2;
+                Arts[0].transform.SetParent(transform);
+                mPickUpObject = Arts[0];
+            }
+            return status;
+        }
+        
+        private Node.Status GoToArt2()
+        {
+            if (!Arts[1].activeSelf) return Node.Status.FAILURE;
+            var status = GoToLocation(Arts[1].transform.position);
+            if (status == Node.Status.SUCCESS)
+            {
+                Arts[1].transform.position = transform.position + Vector3.up * 2;
+                Arts[1].transform.SetParent(transform);
+                mPickUpObject = Arts[1];
+            }
+            return status;
+        }
+        
+        private Node.Status GoToArt3()
+        {
+            if (!Arts[2].activeSelf) return Node.Status.FAILURE;
+            var status = GoToLocation(Arts[2].transform.position);
+            if (status == Node.Status.SUCCESS)
+            {
+                Arts[2].transform.position = transform.position + Vector3.up * 2;
+                Arts[2].transform.SetParent(transform);
+                mPickUpObject = Arts[2];
             }
             return status;
         }

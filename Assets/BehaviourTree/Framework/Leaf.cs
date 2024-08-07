@@ -11,6 +11,13 @@ namespace BTKit
             mName = n;
             mProcessMethod = processMethod;
         }
+        
+        public Leaf(string n, Func<Status> processMethod,int order)
+        {
+            mName = n;
+            mProcessMethod = processMethod;
+            SortOrder = order;
+        }
 
         public override Status Process()
         {

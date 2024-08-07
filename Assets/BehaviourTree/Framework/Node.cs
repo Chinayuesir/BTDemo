@@ -13,6 +13,7 @@ namespace BTKit
         public List<Node> Children = new List<Node>();
         protected int mCurrentChild;
         protected string mName;
+        public int SortOrder;
 
         public string Name
         {
@@ -27,6 +28,12 @@ namespace BTKit
         public Node(string n)
         {
             mName = n;
+        }
+        
+        public Node(string n,int order)
+        {
+            mName = n;
+            SortOrder = order;
         }
 
         public abstract Status Process();

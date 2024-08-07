@@ -2153,6 +2153,42 @@ PrefabInstance:
       propertyPath: FrontDoor
       value: 
       objectReference: {fileID: 1791870521}
+    - target: {fileID: 8459962596926119355, guid: b79d0b13355dc8f44b7956db61a82656, type: 3}
+      propertyPath: Arts.Array.size
+      value: 8
+      objectReference: {fileID: 0}
+    - target: {fileID: 8459962596926119355, guid: b79d0b13355dc8f44b7956db61a82656, type: 3}
+      propertyPath: Arts.Array.data[0]
+      value: 
+      objectReference: {fileID: 1904932022}
+    - target: {fileID: 8459962596926119355, guid: b79d0b13355dc8f44b7956db61a82656, type: 3}
+      propertyPath: Arts.Array.data[1]
+      value: 
+      objectReference: {fileID: 1101234485}
+    - target: {fileID: 8459962596926119355, guid: b79d0b13355dc8f44b7956db61a82656, type: 3}
+      propertyPath: Arts.Array.data[2]
+      value: 
+      objectReference: {fileID: 1922895633}
+    - target: {fileID: 8459962596926119355, guid: b79d0b13355dc8f44b7956db61a82656, type: 3}
+      propertyPath: Arts.Array.data[3]
+      value: 
+      objectReference: {fileID: 1544815185}
+    - target: {fileID: 8459962596926119355, guid: b79d0b13355dc8f44b7956db61a82656, type: 3}
+      propertyPath: Arts.Array.data[4]
+      value: 
+      objectReference: {fileID: 1959054990}
+    - target: {fileID: 8459962596926119355, guid: b79d0b13355dc8f44b7956db61a82656, type: 3}
+      propertyPath: Arts.Array.data[5]
+      value: 
+      objectReference: {fileID: 925317490}
+    - target: {fileID: 8459962596926119355, guid: b79d0b13355dc8f44b7956db61a82656, type: 3}
+      propertyPath: Arts.Array.data[6]
+      value: 
+      objectReference: {fileID: 425408384}
+    - target: {fileID: 8459962596926119355, guid: b79d0b13355dc8f44b7956db61a82656, type: 3}
+      propertyPath: Arts.Array.data[7]
+      value: 
+      objectReference: {fileID: 915494408}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
