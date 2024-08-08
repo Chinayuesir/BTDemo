@@ -10,9 +10,12 @@ namespace BTKit.Demo
         public GameObject Diamond;
         public GameObject Painting;
         public GameObject Van;
+        public GameObject Cop;
+        
         public GameObject[] Arts;
         
         private GameObject mPickUpObject;
+        private Vector3 remeberedLocation;
 
         [Range(0, 1000)] public int Money = 800;
 
@@ -33,11 +36,11 @@ namespace BTKit.Demo
             Leaf goToDiamond = new Leaf("Go To Diamond", GoToDiamond,2);
             Leaf goToPainting = new Leaf("Go To Diamond", GoToPainting,1);
 
-            Leaf goToArt1 = new Leaf("Go To Art 1", GoToArt1);
-            Leaf goToArt2 = new Leaf("Go To Art 2", GoToArt2);
-            Leaf goToArt3 = new Leaf("Go To Art 3", GoToArt3);
-            // Leaf goToArt4 = new Leaf("Go To Art 4", GoToArt4);
-            // Leaf goToArt5 = new Leaf("Go To Art 5", GoToArt5);
+            for (int i = 0; i < Arts.Length; i++)
+            {
+                Leaf goToArt = new Leaf($"Go to {Arts[i].name}",GoToArt,i);
+                selectObject.AddChild(goToArt);
+            }
             
             Leaf goToVan = new Leaf("Go To Van", GoToVan);
 
@@ -51,15 +54,30 @@ namespace BTKit.Demo
 
             steal.AddChild(openDoor);
             steal.AddChild(selectObject);
-            selectObject.AddChild(goToArt1);
-            selectObject.AddChild(goToArt2);
-            selectObject.AddChild(goToArt3);
             steal.AddChild(goToVan);
-            mTree.AddChild(steal);
+
+            Sequence runAway = new Sequence("Run Away");
+            Leaf canSee = new Leaf("Can See Cop?", CanSeeCop);
+            Leaf flee = new Leaf("Flee From Cop", FleeFromCop);
+            
+            runAway.AddChild(canSee);
+            runAway.AddChild(flee);
+            
+            mTree.AddChild(runAway);
 
             mTree.PrintTree();
         }
 
+        private Node.Status CanSeeCop()
+        {
+            return CanSee(Cop.transform.position, "Cop", 10, 90);
+        }
+
+        private Node.Status FleeFromCop()
+        {
+            return Flee(Cop.transform.position, 10);
+        }
+        
         private Node.Status HasMoney()
         {
             if (Money < 500) return Node.Status.FAILURE;
@@ -99,41 +117,15 @@ namespace BTKit.Demo
             return status;
         }
         
-        private Node.Status GoToArt1()
+        private Node.Status GoToArt(int i)
         {
-            if (!Arts[0].activeSelf) return Node.Status.FAILURE;
-            var status = GoToLocation(Arts[0].transform.position);
+            if (!Arts[i].activeSelf) return Node.Status.FAILURE;
+            var status = GoToLocation(Arts[i].transform.position);
             if (status == Node.Status.SUCCESS)
             {
-                Arts[0].transform.position = transform.position + Vector3.up * 2;
-                Arts[0].transform.SetParent(transform);
-                mPickUpObject = Arts[0];
-            }
-            return status;
-        }
-        
-        private Node.Status GoToArt2()
-        {
-            if (!Arts[1].activeSelf) return Node.Status.FAILURE;
-            var status = GoToLocation(Arts[1].transform.position);
-            if (status == Node.Status.SUCCESS)
-            {
-                Arts[1].transform.position = transform.position + Vector3.up * 2;
-                Arts[1].transform.SetParent(transform);
-                mPickUpObject = Arts[1];
-            }
-            return status;
-        }
-        
-        private Node.Status GoToArt3()
-        {
-            if (!Arts[2].activeSelf) return Node.Status.FAILURE;
-            var status = GoToLocation(Arts[2].transform.position);
-            if (status == Node.Status.SUCCESS)
-            {
-                Arts[2].transform.position = transform.position + Vector3.up * 2;
-                Arts[2].transform.SetParent(transform);
-                mPickUpObject = Arts[2];
+                Arts[i].transform.position = transform.position + Vector3.up * 2;
+                Arts[i].transform.SetParent(transform);
+                mPickUpObject = Arts[i];
             }
             return status;
         }
@@ -177,6 +169,33 @@ namespace BTKit.Demo
             }
 
             return status;
+        }
+        
+        private Node.Status CanSee(Vector3 target,string tag,float distance,float maxAngle)
+        {
+            Vector3 dirToTarget = target - transform.position;
+            float angle = Vector3.Angle(dirToTarget, transform.forward);
+            if (angle <= maxAngle && dirToTarget.magnitude <= distance)
+            {
+                RaycastHit hitInfo;
+                if (Physics.Raycast(transform.position, dirToTarget, out hitInfo))
+                {
+                    if (hitInfo.collider.gameObject.CompareTag(tag))
+                    {
+                        return Node.Status.SUCCESS;
+                    }
+                }
+            }
+            return Node.Status.FAILURE;
+        }
+        
+        private Node.Status Flee(Vector3 location,float distance)
+        {
+            if (mState == ActionState.IDLE)
+            {
+                remeberedLocation = transform.position + (transform.position - location).normalized * distance;
+            }
+            return GoToLocation(remeberedLocation);
         }
     }
 }
