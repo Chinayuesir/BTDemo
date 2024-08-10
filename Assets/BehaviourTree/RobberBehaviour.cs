@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using QFramework;
+using UnityEngine;
 using UnityEngine.AI;
 
 namespace BTKit.Demo
@@ -21,6 +22,7 @@ namespace BTKit.Demo
 
         private Leaf goToFrontDoor;
         private Leaf goToBackDoor;
+        private bool mAtVan=true;
 
         new void Start()
         {
@@ -79,6 +81,16 @@ namespace BTKit.Demo
             mTree.AddChild(beThief);
 
             mTree.PrintTree();
+            
+            ActionKit.Repeat()
+                .Condition(() => Money >= 500 && mAtVan)
+                .Callback(() =>
+                {
+                    Money = Mathf.Clamp(Money - Random.Range(5,20), 0, 1000);
+                    if (Money < 500) mAtVan = false;
+                })
+                .Delay(1)
+                .Start(this);
         }
 
         private Node.Status CanSeeCop()
@@ -162,12 +174,12 @@ namespace BTKit.Demo
         private Node.Status GoToVan()
         {
             var status = GoToLocation(Van.transform.position);
-            if (status == Node.Status.SUCCESS && mPickUpObject!=null)
+            if (status == Node.Status.SUCCESS && mPickUpObject!=null && mPickUpObject.activeSelf)
             {
+                mAtVan = true;
                 Money += 300;
                 mPickUpObject.SetActive(false);
             }
-
             return status;
         }
 
