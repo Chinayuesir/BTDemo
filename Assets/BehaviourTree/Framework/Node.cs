@@ -42,6 +42,15 @@ namespace BTKit
         {  
             Children.Add(n);
         }
+
+        public void Reset()
+        {
+            foreach (var child in Children)
+            {
+                child.Reset();
+            }
+            mCurrentChild = 0;
+        }
     }
 }
 

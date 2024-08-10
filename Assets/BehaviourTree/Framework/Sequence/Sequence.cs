@@ -17,6 +17,10 @@
             if (mCurrentChild >= Children.Count)
             {
                 mCurrentChild = 0;
+                foreach (var child in Children)
+                {
+                    child.Reset();
+                }
                 return Status.SUCCESS;
             }
 

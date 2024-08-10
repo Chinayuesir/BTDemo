@@ -11,9 +11,9 @@ namespace BTKit.Demo
         public GameObject Painting;
         public GameObject Van;
         public GameObject Cop;
-        
+
         public GameObject[] Arts;
-        
+
         private GameObject mPickUpObject;
         private Vector3 remeberedLocation;
 
@@ -21,49 +21,62 @@ namespace BTKit.Demo
 
         private Leaf goToFrontDoor;
         private Leaf goToBackDoor;
-        
+
         new void Start()
         {
             base.Start();
-            Sequence steal = new Sequence("Steal Something");
+            Leaf goToDiamond = new Leaf("Go To Diamond", GoToDiamond, 1);
+            Leaf goToPainting = new Leaf("Go To Painting", GoToPainting, 2);
             Leaf hasGotMoney = new Leaf("Has Got Money", HasMoney);
-            
-            PSelector openDoor = new PSelector("Open Door");
-            goToFrontDoor = new Leaf("Go To Front Door", GoToFrontDoor,1);
-            goToBackDoor = new Leaf("Go To Back Door", GoToBackDoor,2);
 
             RSelector selectObject = new RSelector("Select Object to Steal");
-            Leaf goToDiamond = new Leaf("Go To Diamond", GoToDiamond,2);
-            Leaf goToPainting = new Leaf("Go To Diamond", GoToPainting,1);
-
             for (int i = 0; i < Arts.Length; i++)
             {
-                Leaf goToArt = new Leaf($"Go to {Arts[i].name}",GoToArt,i);
-                selectObject.AddChild(goToArt);
+                Leaf gta = new Leaf("Go to " + Arts[i].name, GoToArt, i);
+                selectObject.AddChild(gta);
             }
-            
+
+            goToBackDoor = new Leaf("Go To Backdoor", GoToBackDoor, 2);
+            goToFrontDoor = new Leaf("Go To Frontdoor", GoToFrontDoor, 1);
             Leaf goToVan = new Leaf("Go To Van", GoToVan);
-
-            Inverter inverterMoney = new Inverter("Inverter Money");
-            inverterMoney.AddChild(hasGotMoney);
-
-            openDoor.AddChild(goToFrontDoor);
-            openDoor.AddChild(goToBackDoor);
-
-            steal.AddChild(inverterMoney);
-
-            steal.AddChild(openDoor);
-            steal.AddChild(selectObject);
-            steal.AddChild(goToVan);
+            PSelector opendoor = new PSelector("Open Door");
 
             Sequence runAway = new Sequence("Run Away");
             Leaf canSee = new Leaf("Can See Cop?", CanSeeCop);
             Leaf flee = new Leaf("Flee From Cop", FleeFromCop);
-            
+
+            Inverter invertMoney = new Inverter("Invert Money");
+            invertMoney.AddChild(hasGotMoney);
+
+            opendoor.AddChild(goToFrontDoor);
+            opendoor.AddChild(goToBackDoor);
+
             runAway.AddChild(canSee);
             runAway.AddChild(flee);
+
+            Inverter cantSeeCop = new Inverter("Cant See Cop");
+            cantSeeCop.AddChild(canSee);
+
+            BehaviourTree stealConditions = new BehaviourTree("stealConditions");
+            Sequence conditions = new Sequence("Conditions");
+            conditions.AddChild(cantSeeCop);
+            conditions.AddChild(invertMoney);
+            stealConditions.AddChild(conditions);
+            DepSequence steal = new DepSequence("Steal Something",stealConditions,mAgent);
             
-            mTree.AddChild(runAway);
+            steal.AddChild(opendoor);
+            steal.AddChild(selectObject);
+            steal.AddChild(goToVan);
+
+            Selector stealWithFallback = new Selector("Steal with Fallback");
+            stealWithFallback.AddChild(steal);
+            stealWithFallback.AddChild(goToVan);
+
+            Selector beThief = new Selector("Be a thief");
+            beThief.AddChild(stealWithFallback);
+            beThief.AddChild(runAway);
+
+            mTree.AddChild(beThief);
 
             mTree.PrintTree();
         }
@@ -77,7 +90,7 @@ namespace BTKit.Demo
         {
             return Flee(Cop.transform.position, 10);
         }
-        
+
         private Node.Status HasMoney()
         {
             if (Money < 500) return Node.Status.FAILURE;
@@ -86,7 +99,7 @@ namespace BTKit.Demo
 
         private Node.Status GoToFrontDoor()
         {
-            Node.Status s= GoToDoor(FrontDoor);
+            Node.Status s = GoToDoor(FrontDoor);
             if (s == Node.Status.FAILURE)
                 goToFrontDoor.SortOrder = 10;
             else
@@ -96,7 +109,7 @@ namespace BTKit.Demo
 
         private Node.Status GoToBackDoor()
         {
-            Node.Status s= GoToDoor(BackDoor);
+            Node.Status s = GoToDoor(BackDoor);
             if (s == Node.Status.FAILURE)
                 goToBackDoor.SortOrder = 10;
             else
@@ -114,9 +127,10 @@ namespace BTKit.Demo
                 Diamond.transform.SetParent(transform);
                 mPickUpObject = Diamond;
             }
+
             return status;
         }
-        
+
         private Node.Status GoToArt(int i)
         {
             if (!Arts[i].activeSelf) return Node.Status.FAILURE;
@@ -127,9 +141,10 @@ namespace BTKit.Demo
                 Arts[i].transform.SetParent(transform);
                 mPickUpObject = Arts[i];
             }
+
             return status;
         }
-        
+
         private Node.Status GoToPainting()
         {
             if (!Painting.activeSelf) return Node.Status.FAILURE;
@@ -140,17 +155,19 @@ namespace BTKit.Demo
                 Painting.transform.SetParent(transform);
                 mPickUpObject = Painting;
             }
+
             return status;
         }
 
         private Node.Status GoToVan()
         {
             var status = GoToLocation(Van.transform.position);
-            if (status == Node.Status.SUCCESS)
+            if (status == Node.Status.SUCCESS && mPickUpObject!=null)
             {
                 Money += 300;
                 mPickUpObject.SetActive(false);
             }
+
             return status;
         }
 
@@ -170,8 +187,8 @@ namespace BTKit.Demo
 
             return status;
         }
-        
-        private Node.Status CanSee(Vector3 target,string tag,float distance,float maxAngle)
+
+        private Node.Status CanSee(Vector3 target, string tag, float distance, float maxAngle)
         {
             Vector3 dirToTarget = target - transform.position;
             float angle = Vector3.Angle(dirToTarget, transform.forward);
@@ -186,15 +203,17 @@ namespace BTKit.Demo
                     }
                 }
             }
+
             return Node.Status.FAILURE;
         }
-        
-        private Node.Status Flee(Vector3 location,float distance)
+
+        private Node.Status Flee(Vector3 location, float distance)
         {
             if (mState == ActionState.IDLE)
             {
                 remeberedLocation = transform.position + (transform.position - location).normalized * distance;
             }
+
             return GoToLocation(remeberedLocation);
         }
     }
