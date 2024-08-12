@@ -1,9 +1,8 @@
-﻿using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
 
-namespace BTKit.Demo
+public class Lock : MonoBehaviour
 {
-    public class Lock : MonoBehaviour
-    {
-        public bool IsLocked = false;
-    }
+    public bool isLocked = false;
 }
